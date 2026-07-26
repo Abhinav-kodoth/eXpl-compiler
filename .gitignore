@@ -1,0 +1,15 @@
+# Flex generated files
+lex.yy.c
+
+# Compiled executables
+number
+a.out
+
+# General C/C++ build files
+*.o
+*.out
+*.exe
+
+# Temporary files
+*.swp
+*~
