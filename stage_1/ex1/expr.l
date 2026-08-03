@@ -3,6 +3,7 @@
 #include "y.tab.h"
 %}
 
+
 %%
 [0-9]+      { yylval = makeLeafNode(atoi(yytext)); return NUM; }
 "+"         { return PLUS; }
