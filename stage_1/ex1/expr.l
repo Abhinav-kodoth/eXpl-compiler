@@ -1,6 +1,6 @@
 %{
-#include "y.tab.h"
 #include "tnode.h"
+#include "y.tab.h"
 %}
 
 %%
