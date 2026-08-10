@@ -1,6 +1,6 @@
 %{
-#include "y.tab.h"
-#include "tnode.h"
+#include "tnode.h"   // define YYSTYPE first
+#include "y.tab.h"   // now y.tab.h sees the correct YYSTYPE
 %}
 
 %%
