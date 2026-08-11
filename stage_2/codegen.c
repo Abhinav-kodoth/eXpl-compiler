@@ -79,13 +79,20 @@ reg_index codeGen(struct tnode *t, FILE *target_file) {
 
 /* ---------- Raw system-call helpers (INT-based, as in Experiment II) ---------- */
 
+/*
+ * Read: System Call Number = 7, Interrupt Routine Number = 6,
+ * Argument 1 = -1, Argument 2 = address of the variable to read into.
+ * (Read() is call-by-reference: the syscall writes directly to the
+ * address we pass as argument 2, so there is nothing useful to pop
+ * back out except to keep the stack balanced.)
+ */
 static void genRead(FILE *f, int addr) {
     reg_index sysno = getReg();
-    fprintf(f, "MOV R%d, 6\n", sysno);
+    fprintf(f, "MOV R%d, 7\n", sysno);      /* FIXED: was 6 (that's the INT number, not the syscall number) */
     fprintf(f, "PUSH R%d\n", sysno);
 
     reg_index blank = getReg();
-    fprintf(f, "MOV R%d, -2\n", blank);
+    fprintf(f, "MOV R%d, -1\n", blank);     /* FIXED: was -2 (that's Write's fd code, not Read's) */
     fprintf(f, "PUSH R%d\n", blank);
 
     reg_index addrReg = getReg();
@@ -94,7 +101,7 @@ static void genRead(FILE *f, int addr) {
 
     fprintf(f, "PUSH R%d\n", blank);   /* arg 3, unused */
     fprintf(f, "PUSH R%d\n", blank);   /* return value slot */
-    fprintf(f, "INT 6\n");
+    fprintf(f, "INT 6\n");             /* interrupt number for Read; this was already correct */
 
     fprintf(f, "POP R%d\n", addrReg);
     fprintf(f, "POP R%d\n", blank);
@@ -107,6 +114,11 @@ static void genRead(FILE *f, int addr) {
     freeReg();   /* sysno */
 }
 
+/*
+ * Write: System Call Number = 5, Interrupt Routine Number = 7,
+ * Argument 1 = -2, Argument 2 = the value to print.
+ * (This block was already correct.)
+ */
 static void genWrite(FILE *f, reg_index valueReg) {
     reg_index sysno = getReg();
     fprintf(f, "MOV R%d, 5\n", sysno);
@@ -131,15 +143,20 @@ static void genWrite(FILE *f, reg_index valueReg) {
     freeReg();   /* sysno */
 }
 
+/*
+ * Exit: System Call Number = 10, Interrupt Routine Number = 10.
+ * Needs the full 5-word calling convention (sysno + 3 args + retval slot).
+ */
 static void genExit(FILE *f) {
     reg_index sysno = getReg();
     fprintf(f, "MOV R%d, 10\n", sysno);
     fprintf(f, "PUSH R%d\n", sysno);
     reg_index blank = getReg();
-    fprintf(f, "PUSH R%d\n", blank);
-    fprintf(f, "PUSH R%d\n", blank);
-    fprintf(f, "PUSH R%d\n", blank);
-    fprintf(f, "INT 7\n");
+    fprintf(f, "PUSH R%d\n", blank);   /* arg1, unused */
+    fprintf(f, "PUSH R%d\n", blank);   /* arg2, unused */
+    fprintf(f, "PUSH R%d\n", blank);   /* arg3, unused */
+    fprintf(f, "PUSH R%d\n", blank);   /* return value slot */
+    fprintf(f, "INT 10\n");            /* FIXED: was INT 7 (that's Write's interrupt, not Exit's) */
 }
 
 /* ---------- STATEMENT code generation ---------- */
@@ -192,7 +209,13 @@ void generate_code(struct tnode *root, const char *filename) {
     }
 
     fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", 0, 2056, 0, 0, 0, 0, 0, 0);
-    fprintf(target_file, "MOV SP, 4095\n");
+
+    /* Variables a-z are statically allocated at addresses 4096-4121
+     * (26 words). The runtime stack (used by PUSH/POP for every
+     * read/write syscall) must start ABOVE that reserved region, or
+     * the very first PUSH after this instruction (which writes to
+     * SP+1) will overwrite variable 'a' at 4096, corrupting it. */
+    fprintf(target_file, "MOV SP, 4121\n");   /* FIXED: was 4095, which collided with a-z's storage */
 
     genStmt(root, target_file);
     genExit(target_file);
