@@ -1,0 +1,13 @@
+begin
+read(a);
+read(b);
+repeat
+    b = b + a;
+    a = a + 1;
+    if(b == 36) then
+        break;
+    endif;
+until (a == 10);
+write(b);
+write(a);
+end;
