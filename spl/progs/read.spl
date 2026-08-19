@@ -1,0 +1,29 @@
+alias userSP R3;
+alias address R4;
+
+userSP = SP;
+
+// Register userSP(R3) stores the stack pointer value
+// userSP-3 stores the virt.address of the varaible passed into the read system call
+
+address = [[PTBR + 2* ((userSP-3)/512) ]*512+(userSP-3)%512];
+
+// virtual to physical address translations take place physical address of userSP-3 is retrieved;
+// virt address of the variable is retrieved from the physical address
+
+address = [PTBR + (address/512) * 2 ] * 512 + (address % 512);
+
+// physical address is calculated from the virtual address of the word
+
+inline "IN";
+// read system call user input is moved to register P0 (system reserved register for storing input) 
+
+[address] = P0;
+
+// from P0 the value is moved to memory location referenced by address;
+
+[[PTBR + 2* ((userSP-1)/512) ]*512+(userSP-1)%512] = 0;
+
+//return value is stored in physical address that userSP-1 maps to
+
+ireturn;

@@ -1,0 +1,12 @@
+begin
+read(a);
+b = 0;
+repeat
+    if(a == 0) then
+        break;
+    endif;
+    b = b + a;
+    read(a);
+until (a == 0);
+write(b);
+end;

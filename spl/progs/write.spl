@@ -1,0 +1,14 @@
+alias userSP R3;
+alias data R4;
+userSP = SP;
+
+// userSP-3 stores the word to be printed;
+data = [[PTBR+2* ((userSP-3)/512) ]*512+(userSP-3)%512];
+// virt.address --> physical address => word is stored in the physical address;
+
+print(data);
+// word is written to the console using print instruction
+
+[[PTBR+2* ((userSP-1)/512) ]*512+(userSP-1)%512] = 0;
+//return value is stored in the physical address that userSP-1 maps to
+ireturn;

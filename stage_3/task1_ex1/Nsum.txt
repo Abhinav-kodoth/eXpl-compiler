@@ -1,0 +1,11 @@
+begin
+read(n);
+s = 0;
+i = 1;
+while (i <= n) do
+    read(x);
+    s = s + x;
+    i = i + 1;
+endwhile;
+write(s);
+end;
