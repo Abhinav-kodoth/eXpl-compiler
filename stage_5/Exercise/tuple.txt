@@ -1,0 +1,39 @@
+decl
+tuple student (str name, int rollno, int age) s1, s2, *sptr ;
+tuple faculty (str name, int id) f1;
+enddecl
+
+int main() {
+decl
+    tuple course (str code, int credits) c1, *cptr ;
+enddecl
+
+begin
+    write("--- Global Tests ---");
+
+    read(s1.name);
+    read(s1.rollno);
+
+    sptr = &s1;
+
+    write(sptr.name);
+    write(sptr.rollno); 
+
+    write("--- Local Tests ---");
+
+    read(c1.code);
+    read(c1.credits);
+
+    cptr = &c1;
+
+    write(cptr.code);
+    write(cptr.credits); 
+
+    s2 = s1;
+    write(s2.name);
+
+return 0;
+
+
+end;
+}
