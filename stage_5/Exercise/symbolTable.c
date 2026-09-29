@@ -28,7 +28,7 @@ struct Lsymbol * createLSTFromParams(struct ParamStruct * paramList) {
         struct Lsymbol * newEntry = findLocalSymbol(Lhead, temp->name);
 
         if(newEntry != NULL) {
-            newEntry->binding = bindingOffset + count - i ;
+            newEntry->binding = i - count - 3 ; 
         }
         temp = temp->next ;
         i++ ;

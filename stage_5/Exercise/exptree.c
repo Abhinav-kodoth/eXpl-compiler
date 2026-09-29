@@ -109,15 +109,16 @@ struct tnode * exprNode(int nodeType, struct tnode * left , struct tnode * right
 
 struct tnode * assignNode(struct tnode * left, struct tnode * right) {
     if(left->nodetype == DEREF_NODE) {
-        if(left->type == T_INT_PTR) {
+        if(left->type == T_INT) {
             if(right->type != T_INT) {
                 printf("Type Mismatch\n");
                 exit(1);
             }
-        }
-        if(left->type == T_STR) {
-            printf("Type Incompatible");
-            exit(1);
+        } else if(left->type == T_STR) {
+            if(right->type != T_STR) {
+                printf("Type Mismatch\n");
+                exit(1);
+            }
         }
     }
 
@@ -137,6 +138,7 @@ struct tnode * assignNode(struct tnode * left, struct tnode * right) {
     }
     return createTreeNode(0,NO_VAL,T_VOID,NULL,ASSIGN_NODE,NULL,left,NULL,right);
 }
+
 
 struct tnode * exitNode(int nodeType) {
     return createTreeNode(0,NO_VAL,T_VOID,NULL,EXIT_NODE,NULL,NULL,NULL,NULL);
@@ -178,79 +180,48 @@ struct tnode * setTypeId(struct Gsymbol * Ghead ,struct Lsymbol * Lhead ,struct 
 struct tnode * pointerNode(struct Gsymbol * head,int nodeType,struct tnode * node, struct tnode * left, struct tnode * right) {
     struct Gsymbol * symbolNode = find(head, node->varname);
 
-    struct tnode * temp; // This will be the & or * node
-    
+    struct tnode * temp;
+
     if (nodeType == DEREF_NODE) { // *ptr
         if (node->isPtr == 0) {
             printf("Error: Cannot dereference a non-pointer variable '%s'\n", node->varname);
             exit(1);
         }
-        // The result *ptr is NOT a pointer
-        temp = createTreeNode(0,NO_VAL, node->type,node->varname, DEREF_NODE,symbolNode,NULL,NULL,NULL);
-    } 
-    else if (nodeType == ADDR_NODE) { // &var
-        if (node->isPtr == 1) {
-            printf("Error: Cannot take the address of a pointer '%s'\n", node->varname);
-            exit(1);
+
+        struct TypeTable * pointeeType;
+        if (node->type == T_INT_PTR) {
+            pointeeType = T_INT;
+        } else if (node->type == T_STR_PTR) {
+            pointeeType = T_STR;
+        } else {
+            pointeeType = node->type; // fallback, shouldn't normally happen
         }
-        // The result &var IS a pointer
-        temp = createTreeNode(1,NO_VAL, node->type,node->varname ,ADDR_NODE,symbolNode,NULL,NULL,NULL);
+
+        // The result *ptr is NOT a pointer, and carries the pointee's type
+        temp = createTreeNode(0, NO_VAL, pointeeType, node->varname, DEREF_NODE, symbolNode, NULL, NULL, NULL);
     }
-    
-    temp->left = node;
-    return temp;
-    
-    // struct Gsymbol * symbolNode = find(head, node->varname);
+    else if (nodeType == ADDR_NODE) { // &var
+    if (node->isPtr == 1) {
+        printf("Error: Cannot take the address of a pointer '%s'\n", node->varname);
+        exit(1);
+    }
 
-    // struct tnode * temp = createTreeNode(NO_VAL,T_VOID,NULL,nodeType,symbolNode,NULL,NULL,NULL);
-    
-    // if(node->Lentry != NULL) {
-    //     if(nodeType == DEREF_NODE) {
-    //         if(node->Lentry->type == T_INT_PTR) {
-    //             temp->type = T_INT;
-    //             node->type = T_INT_PTR ;
-    //         } else {
-    //             temp->type = T_STR ;
-    //             node->type = T_STR_PTR ;
-    //         }
-    //     } else if(nodeType == ADDR_NODE) {
-    //         if(node->Lentry->type == T_INT) {
-    //             temp->type = T_INT_PTR ;
-    //             node->type = T_INT ;
-    //         } else {
-    //             temp->type = T_STR_PTR ;
-    //             node->type = T_STR ;
-    //         }
-    //     }
-    //     temp->left = node ;
+    struct TypeTable * ptrType;
+    if (node->type == T_INT) {
+        ptrType = T_INT_PTR;
+    } else if (node->type == T_STR) {
+        ptrType = T_STR_PTR;
+    } else {
+        ptrType = node->type; // fallback, shouldn't normally happen
+    }
 
-    //     return temp ;
-
-    // } else if(node->Gentry != NULL){
-    //     if(nodeType == DEREF_NODE) {
-    //         if(node->Gentry->type == T_INT_PTR) {
-    //             temp->type = T_INT;
-    //             node->type = T_INT_PTR ;
-    //         } else {
-    //             temp->type = T_STR ;
-    //             node->type = T_STR_PTR ;
-    //         }
-    //     } else if(nodeType == ADDR_NODE) {
-    //         if(node->Gentry->type == T_INT) {
-    //             temp->type = T_INT_PTR ;
-    //             node->type = T_INT ;
-    //         } else {
-    //             temp->type = T_STR_PTR ;
-    //             node->type = T_STR ;
-    //         }
-    //     }
-    //     temp->left = node ;
-
-    //     return temp ;
-    // }
-    // return NULL ;
+    // The result &var IS a pointer
+    temp = createTreeNode(1, NO_VAL, ptrType, node->varname, ADDR_NODE, symbolNode, NULL, NULL, NULL);
 }
 
+    temp->left = node;
+    return temp;
+}
 struct tnode * returnNode(struct Gsymbol * funcEntry, int nodetype, struct tnode * node) {
 
     if (node->type->fields != NULL) {
