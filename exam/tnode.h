@@ -3,18 +3,16 @@
 
 typedef struct tnode {
     int val;
-    char *varname;
     char *op;
     struct tnode *left, *right;
 } tnode;
 
 #define YYSTYPE tnode*
 
-struct tnode* makeNumNode(int n);
-struct tnode* makeIdNode(char *name);
+struct tnode* makeLeafNode(int n);
 struct tnode* makeOperatorNode(char op, struct tnode *l, struct tnode *r);
-struct tnode* makeAssignNode(struct tnode *id, struct tnode *expr);
 
-void printAST(struct tnode *root, int depth);
+void printPrefix(struct tnode *root);
+void printPostfix(struct tnode *root);
 
 #endif
