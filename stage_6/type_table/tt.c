@@ -70,6 +70,14 @@ void ttAddField(char* typeName, char* name) {
         ttEntry = ttEntry->next;
     }
 
+        // Reject duplicate member names within the same type
+    for(fieldList *f = ttEntry->fields; f != NULL; f = f->next) {
+        if(strcmp(f->name, name) == 0) {
+            printf("Error: Duplicate field '%s' in type '%s'\n", name, ttEntry->name);
+            exit(1);
+        }
+    }
+
     fieldList *newField = createFieldListNode();
     newField->name = strdup(name);
     newField->type = ttLookup(typeName);

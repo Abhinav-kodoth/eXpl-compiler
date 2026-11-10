@@ -19,6 +19,7 @@ struct Gsymbol {
     int size1 ;                 // size of the type of the variable
     int binding ;               // stores the static memory address allocated to the variable
     int flabel ;
+    int callCount ;  
     bool isPtr ;
     struct TypeTable * type ;   
     struct tnode * bodyAST ;
@@ -33,6 +34,7 @@ struct Lsymbol {
     bool isPtr ;              //flag to check whether the type is pointer or not
     struct TypeTable * type ; //pointer to type table entry of parameter type
     int binding ;             //local binding of the variable
+    
     struct Lsymbol *next ;    //points to the next Local Symbol Table entry
 };
 
@@ -56,5 +58,8 @@ struct ParamStruct * findinParamList(struct ParamStruct * head, char * name);
 int countParameterList(struct ParamStruct * paramlist);
 
 void printSymbolTable(struct Gsymbol * head);
+void printFunctionTable(struct Gsymbol * head);
+void printCallCounts(struct Gsymbol * head);
 void printLocalSymbolTable(struct Lsymbol * head);
 void printParamList(struct ParamStruct * head) ;
+void checkAllFunctionsDefined(struct Gsymbol * head);

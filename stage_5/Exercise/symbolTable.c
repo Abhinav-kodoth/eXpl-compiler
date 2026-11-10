@@ -5,6 +5,7 @@
 
 int bindAddress = STACK_BASE ;
 int localBinding = -1;
+extern int yylineNum;
 
 struct Lsymbol * createLSTFromParams(struct ParamStruct * paramList) {
     struct Lsymbol * Lhead = NULL ;
@@ -88,6 +89,11 @@ struct Gsymbol* createSymbolNode(char* name, struct TypeTable * type,bool isPtr,
     node->binding = bindAddress ;
     bindAddress += size1 ;
     node->flabel = flabel ;
+    node->callCount = 0 ;
+    node->bodyAST   = NULL ;
+    node->paramList = NULL ;
+    node->Lentry    = NULL ;
+
     return node ;
 }
 
@@ -269,5 +275,65 @@ void checkDeclAndDefn(struct Gsymbol * currentFunc,struct TypeTable * type) {
     if(strcmp(funcType,type->name) != 0) {
         printf("Function Declaration return type and Definition return type does not match\n");
         exit(1);
+    }
+}
+
+static const char * funcDisplayName(struct Gsymbol * g) {
+    return (g->flabel == 0) ? "main" : g->name;   // main is stored under the name "F0"
+}
+
+static struct Gsymbol * functionWithLabel(struct Gsymbol * head, int label) {
+    for(struct Gsymbol * g = head; g != NULL; g = g->next)
+        if(g->flabel == label) return g;
+    return NULL;
+}
+
+static int maxFunctionLabel(struct Gsymbol * head) {
+    int max = -1;
+    for(struct Gsymbol * g = head; g != NULL; g = g->next)
+        if(g->flabel > max) max = g->flabel;
+    return max;
+}
+
+void printFunctionTable(struct Gsymbol * head) {
+    printf("\n================ FUNCTION TABLE ================\n");
+    printf("%-6s %-16s %-8s %s\n", "Label", "Name", "Return", "Parameters");
+    int max = maxFunctionLabel(head);
+    for(int label = 0; label <= max; label++) {
+        struct Gsymbol * g = functionWithLabel(head, label);
+        if(g == NULL) continue;
+
+        printf("F%-5d %-16s %-8s (", g->flabel, funcDisplayName(g), g->type->name);
+        for(struct ParamStruct * p = g->paramList; p != NULL; p = p->next) {
+            printf("%s%s %s", p->type->name, p->isPtr ? "*" : "", p->name);
+            if(p->next != NULL) printf(", ");
+        }
+        printf(")\n");
+    }
+    printf("================================================\n");
+}
+
+void printCallCounts(struct Gsymbol * head) {
+    printf("\n================ CALL COUNTS ===================\n");
+    printf("%-6s %-16s %s\n", "Label", "Function", "Call sites");
+    int max = maxFunctionLabel(head);
+    for(int label = 0; label <= max; label++) {
+        struct Gsymbol * g = functionWithLabel(head, label);
+        if(g == NULL) continue;
+        printf("F%-5d %-16s %d\n", g->flabel, funcDisplayName(g), g->callCount);
+    }
+    printf("================================================\n");
+}
+
+void checkAllFunctionsDefined(struct Gsymbol * head) {
+    struct Gsymbol * temp = head ;
+
+    while(temp) {
+        // flabel > 0 -> user function (globals have -1, main "F0" has 0)
+        if(temp->flabel > 0 && temp->bodyAST == NULL) {
+            printf("Error: Function '%s' declared but not defined\n", temp->name);
+            exit(1);
+        }
+        temp = temp->next ;
     }
 }

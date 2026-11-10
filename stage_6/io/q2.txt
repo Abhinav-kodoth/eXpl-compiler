@@ -1,0 +1,10 @@
+type
+ A { int x; str x; }
+endtype
+decl enddecl
+int main(){
+ decl enddecl
+ begin
+  return 0;
+ end
+}

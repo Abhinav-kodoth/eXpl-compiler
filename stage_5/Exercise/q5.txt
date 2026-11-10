@@ -1,0 +1,30 @@
+decl
+  int f(int n);
+enddecl
+
+int f(int n)
+{
+  decl
+    int x, y;
+    int x;
+  enddecl
+
+  begin
+    x = n;
+    return x;
+  end;
+}
+
+int main()
+{
+  decl
+    int res;
+  enddecl
+
+  begin
+    res = f(5);
+    write(res);
+
+    return 0;
+  end;
+}

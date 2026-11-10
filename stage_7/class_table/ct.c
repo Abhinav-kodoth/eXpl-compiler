@@ -90,6 +90,16 @@ classTable *ctLookup(char *name) {
 }
 
 void ctInstall(char *name) {
+     if(ctLookup(name) != NULL) {
+        printf("Error: Duplicate class name '%s'\n", name);
+        exit(1);
+    }
+    if(ttLookup(name) != NULL) {
+        printf("Error: Class name '%s' clashes with an existing type name\n", name);
+        exit(1);
+    }
+
+
     classTable *temp = createClassTableNode(name);
     
     if(ctRoot == NULL){
@@ -120,6 +130,15 @@ void ctAddField(char* name, char* classOrTypeName) {
         root = root->next;
     }
 
+
+    for(cFieldList *f = root->memberFields; f != NULL; f = f->next) {
+    if(strcmp(f->name, name) == 0) {
+        printf("Error: Duplicate member field '%s' in class '%s'\n", name, root->name);
+        exit(1);
+    }
+    }
+
+
     temp->fieldIndex = root->fieldCount++;
     if(root->fieldCount > 8) {
         printf("Error: Class '%s' cannot have more than 8 fields\n", root->name);
@@ -149,6 +168,13 @@ void ctAddMethod(char* name, char* returnType) {
     classTable *root = ctRoot;
     while(root->next != NULL) {
         root = root->next;
+    }
+
+    for(cMethodList *m = root->memberMethods; m != NULL; m = m->next) {
+    if(strcmp(m->name, name) == 0) {
+        printf("Error: Duplicate method '%s' in class '%s'\n", name, root->name);
+        exit(1);
+    }
     }
 
     temp->funcIndex = root->methodCount++;

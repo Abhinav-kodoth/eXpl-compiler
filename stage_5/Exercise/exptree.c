@@ -279,7 +279,7 @@ struct tnode * funcNode(struct Gsymbol * Ghead ,struct tnode * node, struct tnod
         printf("Too many arguments in function call\n");
         exit(1);
     }
-
+        funcEntry->callCount++ ;      // one more call site (all checks passed)
     struct tnode * callNode =  createTreeNode(0,NO_VAL,funcEntry->type,funcEntry->name,FUNC_CALL_NODE,funcEntry,NULL,NULL,NULL);
 
     node->argList = arglist ;

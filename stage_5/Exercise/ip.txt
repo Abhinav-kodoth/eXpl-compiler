@@ -1,0 +1,69 @@
+decl
+    int result, total;
+    int fact(int n);
+    int add(int a, int b);
+    str greet(str name, int times);
+    int unused(int x);
+enddecl
+
+int fact(int n)
+{
+    decl
+        int r;
+    enddecl
+    begin
+        if (n <= 1) then
+            r = 1;
+        else
+            r = n * fact(n - 1);
+        endif;
+        return r;
+    end;
+}
+
+int add(int a, int b)
+{
+    decl
+    enddecl
+    begin
+        return a + b;
+    end;
+}
+
+str greet(str name, int times)
+{
+    decl
+    enddecl
+    begin
+        write(name);
+        return name;
+    end;
+}
+
+int unused(int x)
+{
+    decl
+    enddecl
+    begin
+        return x;
+    end;
+}
+
+int main()
+{
+    decl
+        str s;
+        int i;
+    enddecl
+    begin
+        result = fact(4);
+        total = add(result, add(1, 2));
+        i = 0;
+        while (i < 3) do
+            s = greet("hi", i);
+            i = i + 1;
+        endwhile;
+        write(total);
+        return 0;
+    end;
+}

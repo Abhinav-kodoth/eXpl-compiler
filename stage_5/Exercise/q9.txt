@@ -1,0 +1,18 @@
+decl
+  int fact(int n);
+enddecl
+
+int main()
+{
+  decl
+    int a, res;
+  enddecl
+
+  begin
+    read(a);
+    res = fact(a);
+    write(res);
+
+    return 0;
+  end;
+}

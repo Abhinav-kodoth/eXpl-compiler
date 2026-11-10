@@ -457,6 +457,7 @@ void semantics(node* root) {
         case NODE_FIELD: {
             fieldLevel++;
             if(fieldLevel <= 1) {
+                getType(root); 
                 enforcePrivateAttributes(root);
             }
             if(root->left->nodetype != NODE_FIELD) {
@@ -475,19 +476,42 @@ void semantics(node* root) {
         }
 
         case NODE_FIELDFN: {
-            if(root->left->nodetype != NODE_FIELD) {
-                if(getDerefLevel(root->left) != 0) {
-                    printf("Semantics Error: Cannot access field of pointer variable '%s' without dereferencing\n", root->left->varname);
+                node* methodName = root->right->left;
+                node* methodArgs = root->right->right;
+
+                if(root->left->nodetype != NODE_FIELD) {
+                    if(getDerefLevel(root->left) != 0) {
+                        printf("Semantics Error: Cannot access field of pointer variable '%s' without dereferencing\n", root->left->varname);
+                        exit(1);
+                    }
+                    if(root->left->nodetype == NODE_ADDR_OF) {
+                        printf("Semantics Error: Cannot access field of address of variable '%s'\n", root->left->right->varname);
+                        exit(1);
+                    }
+                }
+                semantics(root->left);
+
+                typeHandle* recv = getType(root->left);
+                if(recv == NULL || recv->cType == NULL) {
+                    printf("Semantics Error: Cannot call method '%s' on a value that is not a class object\n", methodName->varname);
                     exit(1);
                 }
-                if(root->left->nodetype == NODE_ADDR_OF) {
-                    printf("Semantics Error: Cannot access field of address of variable '%s'\n", root->left->right->varname);
+
+                cMethodList* method = ctMethodLookup(recv->cType->name, methodName->varname);
+                if(method == NULL) {
+                    printf("Semantics Error: Call to undeclared method '%s' of class '%s'\n", methodName->varname, recv->cType->name);
                     exit(1);
                 }
+
+                semantics(methodArgs);
+                struct paramStruct* params = method->params;
+                matchParamsList(&params, methodArgs);
+                if(params != NULL) {
+                    printf("Semantics Error: Too few arguments in call to method '%s' of class '%s'\n", methodName->varname, recv->cType->name);
+                    exit(1);
+                }
+                return;
             }
-            semantics(root->left);
-            return;
-        }
 
         case NODE_FNCALL: {
             gst* gstEntry = root->gstEntry;

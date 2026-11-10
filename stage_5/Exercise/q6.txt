@@ -1,0 +1,29 @@
+decl
+  int add(int a, int b);
+enddecl
+
+int add(int a, int b)
+{
+  decl
+    int r;
+  enddecl
+
+  begin
+    r = a + b;
+    return r;
+  end;
+}
+
+int main()
+{
+  decl
+    int res;
+  enddecl
+
+  begin
+    res = add(1);
+    write(res);
+
+    return 0;
+  end;
+}

@@ -69,7 +69,7 @@ program     :   GDeclBlock FDefBlock MainBlock  {}
             |   MainBlock                       {}
             ;
 
-MainBlock   :   INT MAIN '(' ')' '{'            {   
+MainBlock   :   INT MAIN '(' ')' '{'            {   checkAllFunctionsDefined(Ghead); 
                                                     Ghead = insertTable(Ghead,"F0",T_INT,false,0,0); 
                                                     currentFunc = find(Ghead, "F0");
                                                     if(currentFunc == NULL) {
@@ -402,6 +402,9 @@ int main(int argc, char** argv) {
     fprintf(output,"CALL F0\n");
     yyparse();
     auxFunctions(output,EXIT_CODE,-1,-1);
+
+        printFunctionTable(Ghead);      // printed at the end of every successful compile
+    printCallCounts(Ghead);
 
     fclose(output);
     return 0;

@@ -1,0 +1,18 @@
+decl
+  int a;
+enddecl
+
+int main()
+{
+  decl
+    int res;
+  enddecl
+
+  begin
+    read(a);
+    res = mystery(a);
+    write(res);
+
+    return 0;
+  end;
+}

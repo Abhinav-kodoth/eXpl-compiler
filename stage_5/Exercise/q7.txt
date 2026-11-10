@@ -1,0 +1,29 @@
+decl
+  int twice(int n);
+enddecl
+
+int twice(int n)
+{
+  decl
+    int r;
+  enddecl
+
+  begin
+    r = n * 2;
+    return r;
+  end;
+}
+
+int main()
+{
+  decl
+    int res;
+  enddecl
+
+  begin
+    res = twice("hello");
+    write(res);
+
+    return 0;
+  end;
+}

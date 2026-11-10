@@ -1,0 +1,29 @@
+decl
+  int hello();
+enddecl
+
+int hello()
+{
+  decl
+    int x;
+  enddecl
+
+  begin
+    x = 42;
+    return x;
+  end;
+}
+
+int main()
+{
+  decl
+    int res;
+  enddecl
+
+  begin
+    res = hello();
+    write(res);
+
+    return 0;
+  end;
+}
